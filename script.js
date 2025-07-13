@@ -6,7 +6,7 @@ const materias = [
   { nombre: "Int. Química Industrial", anio: 1, semestre: "anual", previaturas: [] },
   { nombre: "Inglés 1", anio: 1, semestre: "anual", previaturas: [] },
 
-  // PRIMER AÑO - Primer semestre (sin previaturas)
+  // PRIMER AÑO - Primer semestre
   { nombre: "Economía", anio: 1, semestre: 1, previaturas: [] },
   { nombre: "Estadística", anio: 1, semestre: 1, previaturas: [] },
 
@@ -40,51 +40,40 @@ let aprobadas = [];
 
 function crearMalla() {
   const container = document.getElementById("malla-container");
-
-  // Limpiar contenido para recargar
   container.innerHTML = "";
 
-  // Agrupar por año y semestre para mostrar
   for (let anio = 1; anio <= 3; anio++) {
     const tituloAnio = document.createElement("div");
     tituloAnio.className = "año";
     tituloAnio.textContent = `Año ${anio}`;
     container.appendChild(tituloAnio);
 
-    // Mostrar materias anuales
-    materias
-      .filter(m => m.anio === anio && m.semestre === "anual")
-      .forEach(materia => {
-        const div = crearDivMateria(materia);
-        container.appendChild(div);
-      });
+    const anual = materias.filter(m => m.anio === anio && m.semestre === "anual");
+    const sem1 = materias.filter(m => m.anio === anio && m.semestre === 1);
+    const sem2 = materias.filter(m => m.anio === anio && m.semestre === 2);
 
-    // Mostrar materias primer semestre
-    const materiasPrimerSem = materias.filter(m => m.anio === anio && m.semestre === 1);
-    if (materiasPrimerSem.length > 0) {
-      const tituloSem1 = document.createElement("div");
-      tituloSem1.className = "semestre";
-      tituloSem1.textContent = "Primer Semestre";
-      container.appendChild(tituloSem1);
-
-      materiasPrimerSem.forEach(materia => {
-        const div = crearDivMateria(materia);
-        container.appendChild(div);
-      });
+    if (anual.length > 0) {
+      const label = document.createElement("div");
+      label.className = "semestre";
+      label.textContent = "Materias Anuales";
+      container.appendChild(label);
+      anual.forEach(m => container.appendChild(crearDivMateria(m)));
     }
 
-    // Mostrar materias segundo semestre
-    const materiasSegundoSem = materias.filter(m => m.anio === anio && m.semestre === 2);
-    if (materiasSegundoSem.length > 0) {
-      const tituloSem2 = document.createElement("div");
-      tituloSem2.className = "semestre";
-      tituloSem2.textContent = "Segundo Semestre";
-      container.appendChild(tituloSem2);
+    if (sem1.length > 0) {
+      const label = document.createElement("div");
+      label.className = "semestre";
+      label.textContent = "Primer Semestre";
+      container.appendChild(label);
+      sem1.forEach(m => container.appendChild(crearDivMateria(m)));
+    }
 
-      materiasSegundoSem.forEach(materia => {
-        const div = crearDivMateria(materia);
-        container.appendChild(div);
-      });
+    if (sem2.length > 0) {
+      const label = document.createElement("div");
+      label.className = "semestre";
+      label.textContent = "Segundo Semestre";
+      container.appendChild(label);
+      sem2.forEach(m => container.appendChild(crearDivMateria(m)));
     }
   }
 
@@ -100,7 +89,7 @@ function crearDivMateria(materia) {
 }
 
 function toggleMateria(nombre, div) {
-  if (!div.classList.contains("desbloqueada")) return;
+  if (!div.classList.contains("desbloqueada") && !div.classList.contains("aprobada")) return;
 
   if (aprobadas.includes(nombre)) {
     aprobadas = aprobadas.filter(m => m !== nombre);
@@ -117,15 +106,16 @@ function actualizarEstado() {
   Array.from(bloques).forEach(b => {
     const nombre = b.textContent;
     const mat = materias.find(m => m.nombre === nombre);
-
-    // Materias desbloqueadas si todas sus previaturas están aprobadas
     const desbloqueada = mat.previaturas.every(p => aprobadas.includes(p));
-    b.className = "materia " + (desbloqueada ? "desbloqueada" : "bloqueada");
+
+    b.className = "materia";
 
     if (aprobadas.includes(nombre)) {
-      b.style.backgroundColor = "#c8e6c9"; // verde claro para aprobadas
+      b.classList.add("aprobada");
+    } else if (desbloqueada) {
+      b.classList.add("desbloqueada");
     } else {
-      b.style.backgroundColor = "";
+      b.classList.add("bloqueada");
     }
   });
 }
